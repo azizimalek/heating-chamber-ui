@@ -1,0 +1,1385 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Heating Chamber UI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+  </head>
+  <script src="https://unpkg.com/feather-icons"></script>
+  <body>
+    <div class="container">
+        <div style="padding-top: 5%;">
+            <h1 class="text-center">Heating Chamber Controller UI</h1>
+            <div style="padding:1%" class="text-end">
+              <div>
+                <a>Elapsed Time: </a><a id="elapsedTime">0</a>
+              </div>
+              <button id="connectBle" type="button" class="btn btn-primary">Connect</button>
+              <button id="recordBtn" type="button" class="btn btn-danger">Record</button>
+              <button type="button" id="settingbtn"  class="btn btn-light" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                <i data-feather="settings"></i>
+              </button>
+            </div>
+            <div class="input-group mb-3">
+              <input type="text" id="commandInput" class="form-control" placeholder="Send Command" aria-label="Send Command" aria-describedby="sendCmdBtn">
+              <button class="btn btn-outline-secondary" type="button" id="sendCmdBtn"><i data-feather="terminal"></i> Send</button>
+            </div>
+            <div class="row">
+              <div class="col shadow-sm p-3 mb-5 bg-white rounded" style="margin: 2%;">Ambient Temperature <br><a><strong id="ambienttempvalue"></strong></a> </div>
+              <div class="col shadow-sm p-3 mb-5 bg-white rounded" style="margin: 2%;">Specimen Temperature <br> <a><strong id="objecttempvalue"></strong></a></div>
+              <div class="col shadow-sm p-3 mb-5 bg-white rounded" style="margin: 2%;">Target Temperature  <br><a><strong id="targettempvalue"></strong></a></div>
+              <div class="col shadow-sm p-3 mb-5 bg-white rounded" style="margin: 2%;">Load Value <br><a><strong id="loadvalue"></strong></a> </div>
+              <div class="col shadow-sm p-3 mb-5 bg-white rounded" style="margin: 2%;">Laser Distance Value <br> <a><strong id="laserdistancevalue"></strong></a></div>
+            </div>
+            <h5>Heating Chamber Controller</h5>
+            <div class="row">
+              <div class="col mx-auto d-grid gap-2" style="margin: 2%;"><button class="btn btn-success" type="button" id="startTargetTempBtn">Start</button></div>
+              <div class="col mx-auto d-grid gap-2" style="margin: 2%;"><button class="btn btn-danger" type="button" id="stopTargetTempBtn">Stop</button></div>
+              <div class="col mx-auto d-grid gap-2">
+                <div class="input-group mb-3">
+                  <input type="number" id="targetTempInput" class="form-control" placeholder="Target temperature" aria-label="Recipient's username" aria-describedby="button-addon2" value=0>
+                  <button class="btn btn-outline-secondary" type="button" id="updateTargetTempBtn">Update</button>
+                </div>
+              </div>
+              <!-- <div class="col mx-auto d-grid gap-2"> -->
+              <h5>Dynamic Load Controller</h5>
+              <div class="row">
+                <div class="col">
+                  <h6>Motor Controller</h6>
+                  <div class="row">
+                    <div class="col mx-auto d-grid gap-2">
+                      <div class="col bg-white rounded" >Move Steps <br><a><strong id="stepperStepsvalue"></strong></a> </div>
+                      <div class="input-group">
+                        <input type="number" id="stepperStepsInput" class="form-control" placeholder="Stepper Steps" aria-label="Recipient's username" aria-describedby="button-addon2" value=1000>
+                      </div>
+                    </div>
+                    <div class="col mx-auto d-grid gap-2 mb-2"><button class="btn btn-primary" type="button" id="steppermoveforewardBtn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-circle" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v5.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V4.5z"/>
+                    </svg> Move Down</button></div>
+                    <div class="col mx-auto d-grid gap-2 mb-2"><button class="btn btn-primary" type="button" id="steppermovebackwardBtn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-circle" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-7.5 3.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V11.5z"/>
+                    </svg> Move Up</button></div>
+                    <div class="col mx-auto d-grid gap-2 mb-2"><button class="btn btn-primary" type="button" id="stepperhomeBtn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-house" viewBox="0 0 16 16">
+                      <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.707 1.5ZM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5 5 5Z"/>
+                    </svg> Home</button></div>
+                    <div class="col mx-auto d-grid gap-2 mb-2"><button class="btn btn-danger" type="button" id="stepperStopBtn">Stop Motor</button></div>
+                  </div>
+                  <div class="row mb-2">
+                    <div class="col mx-auto d-grid gap-2">
+                      <div class="col bg-white rounded" >Motor Speed (0-30000) <br><a><strong id="stepperSpeedvalue"></strong></a> </div>
+                      <div class="input-group">
+                        <input type="number" id="stepperSpeedInput" class="form-control" placeholder="Stepper Speed" aria-label="Recipient's username" aria-describedby="button-addon2" value=10000>
+                      </div>
+                    </div>
+                    <div class="col mx-auto d-grid gap-2"><button class="btn btn-primary" type="button" id="setStepperSpeedBtn">Set Speed</button></div>
+                    <div class="col mx-auto d-grid gap-2">
+                      <div class="col bg-white rounded" >Oscillation Amplitude <br><a><strong id="stepperOscillationStepvalue"></strong></a> </div>
+                      <div class="input-group">
+                        <input type="number" id="oscillationStepInput" class="form-control" placeholder="Oscillation Steps" aria-label="Recipient's username" aria-describedby="button-addon2" value=500>
+                      </div>
+                    </div>
+                    <div class="col mx-auto d-grid gap-2"><button class="btn btn-primary" type="button" id="setStepperOscillateStepsBtn">Set Amplitude</button></div>
+                  </div>
+                  <div class="row">
+                    <div class="col mx-auto d-grid gap-2 mb-2"><button class="btn btn-primary" type="button" id="stepperOscillateBtn">Run Oscillation Test</button></div>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="row">
+                    <h6>Load Sensor Calibration</h6>
+                    <div class="col mx-auto d-grid gap-2"><button class="btn btn-primary" type="button" id="loadtareBtn">Tare</button></div>
+                  </div>
+                  <div class="row mt-3">
+                    <h6>Distance Sensor Calibration</h6>
+                    <div class="col mx-auto d-grid gap-2">
+                      <div class="col bg-white rounded" style="margin: 2%;">Correction Scale <br><a><strong id="distanceCorrectionScalevalue"></strong></a> </div>
+                      <div class="input-group">
+                        <input type="number" id="distanceScaleInput" class="form-control" placeholder="Target temperature" aria-label="Recipient's username" aria-describedby="button-addon2" value=3>
+                      </div>
+                      <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="distanceRawCb">
+                        <label class="form-check-label" for="flexSwitchCheckDefault">Use Raw Value (no correction)</label>
+                      </div>
+                    </div>
+                    <div class="col mx-auto d-grid gap-2"><button class="btn btn-primary" type="button" id="setDistanceConfigBtn">Set</button></div>
+                  </div>
+                </div>
+              </div>
+              </div>
+
+              </div>
+            
+            <!-- <div>
+                <p id="readvalue"></p><br>
+            </div> -->
+            <br>
+            <h5>Data</h5>
+            <div class="row">
+              <div class="col-6">
+                <div class="row">
+                  <div style="padding-top: 1%;">
+                    <canvas id="dataChart"></canvas>
+                </div>
+                </div>
+              <div class="row">
+                <div class="container">
+                  <div class="row">
+                    <!-- <div class="col">
+                      <canvas id="expChart"></canvas>
+                    </div> -->
+                    <div class="col">
+                      <table class="table table-hover">
+                        <thead>
+                          <tr>
+                            <th scope="col">No</th>
+                            <th scope="col">Target Temperature</th>
+                            <th scope="col">Profile</th>
+                            <th scope="col">Interval</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <th scope="row">1</th>
+                            <td>30 celcius</td>
+                            <td>Step</td>
+                            <td>10s</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <div class="container">
+                        <div class="row">
+                          <div class="col">
+                            <input class="form-control" type="text" placeholder="Target temperature (celcius)" aria-label="default input example">
+                          </div>
+                          <div class="col">
+                            <div class="btn-group">
+                              <select class="form-select" id="exp-profile">
+                                <option selected value="1">Step</option>
+                                <option value="2">Slope</option>
+                                <option value="3">Exponential</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div class="col">
+                            <input class="form-control" type="text" placeholder="Time interval (ms)" aria-label="default input example">
+                          </div>
+                          <div class="col">
+                            <button type="button" class="btn btn-primary">Add</button>
+                          </div>
+                          <div class="col">
+                            <!-- <canvas id="curveCanvas" width="400" height="200"></canvas> -->
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+    
+              </div>
+              </div>
+              <div class="col-6">
+                <div class="row">
+                  <div style="padding-top: 1%;">
+                    <canvas id="loaddataChart"></canvas>
+                </div>
+                </div>
+                <div class="row">
+                  <div style="padding-top: 1%;">
+                    <canvas id="laserdataChart"></canvas>
+                </div>
+                </div>
+              </div>
+            </div>
+            <br>
+            <!-- <canvas id="curveCanvas" width="400" height="200"></canvas> -->
+            
+        </div>
+    </div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Settings</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="input-group mb-3">
+          <span class="input-group-text" id="p-ctrl-val">P Gain</span>
+          <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+        </div>
+        <div class="input-group mb-3">
+          <span class="input-group-text" id="i-ctrl-val">I Gain</span>
+          <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+        </div>
+        <div class="input-group mb-3">
+          <span class="input-group-text" id="d-ctrl-val">D Gain</span>
+          <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+        </div>
+
+
+        <div class="container py-2">
+          <div class="row">
+            <div class="col">
+              <div class="mb-3">
+                <input class="form-control" type="file" id="formFile" webkitdirectory multiple/>
+              </div>
+            </div>
+          </div>
+        </div>
+                        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <!-- <script src="kalman.js" type="text/javascript"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/kalmanjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+
+        var timeInterval = 100;
+        var maxTimeGraph = 50; //in seconds
+        var start = 0;
+        var end = 1000;//*maxTimeGraph/timeInterval;
+        var isWriteLock = false;
+        var isWaitforNotifyDone = false;
+
+        // Initialize Kalman filter
+        const distanceKalmanFilter = new KalmanFilter({ R: 0.05, Q: 1.5, A: 1, B: 0, C: 1 });
+        const loadKalmanFilter = new KalmanFilter({ R: 1, Q: 1.0, A: 1, B: 0, C: 1 });
+
+        var arr = [];
+
+        for (var i = start; i <= end; i++) {
+            arr.push(i+1);
+        }
+        const labels = arr;
+
+        var data1 = [];
+        // for (var i = start; i <= end; i++) {
+        //     data1.push(Math.floor(Math.random() * (100 - 0 + 1) + 0));
+        // }
+
+        var data2 = [];
+        // for (var i = start; i <= end; i++) {
+        //     data2.push(Math.floor(Math.random() * (100 - 0 + 1) + 0));
+        // }
+
+        var data3 = [];
+        // for (var i = start; i <= end; i++) {
+        //     data3.push(50);
+        // }
+
+        var loadDataArray = [];
+        var distanceDataArray = [];
+      
+        const data = {
+          labels: labels,
+          datasets: [{
+            label: 'Chamber Temperature',
+            backgroundColor: 'rgb(50, 100, 168)',
+            borderColor: 'rgb(50, 100, 168)',
+            data: data2,
+            pointRadius: 0,
+          },{
+            label: 'Specimen Temperature',
+            backgroundColor: 'rgb(196, 73, 20)',
+            borderColor: 'rgb(196, 73, 20)',
+            data: data1,
+            pointRadius: 0,
+          },{
+            label: 'Target Specimen Temperature',
+            backgroundColor: 'rgb(235, 180, 2)',
+            borderColor: 'rgb(235, 180, 2)',
+            data: data3,
+            pointRadius: 0,
+          }]
+        };
+      
+        const config = {
+          type: 'line',
+          data: data,
+          options: {
+            // responsive: false,
+            animation: false,
+            scales: {
+                x:{
+                    display: false,
+                    // beginAtZero: true,
+                    // suggestedMax: 100
+                    suggestedMin: 0,
+                    suggestedMax: 1000,
+                    // ticks: {
+                    //   // forces step size to be 50 units
+                    //   stepSize: 50
+                    // }
+                },
+                y: {
+                    suggestedMin: 0,
+                    suggestedMax: 50
+                }
+            },
+            plugins: {
+            title: {
+                display: true,
+                text: 'Heating Chamber Data'
+            }
+            }
+          }
+        };
+
+        const loadsimdata = {
+          labels: labels,
+          datasets: [{
+            label: 'Specimen Load',
+            backgroundColor: 'rgb(50, 100, 168)',
+            borderColor: 'rgb(50, 100, 168)',
+            data: loadDataArray,
+            pointRadius: 0,
+          }]
+        };
+
+        const laserdata = {
+          labels: labels,
+          datasets: [{
+            label: 'Specimen Displacement',
+            backgroundColor: 'rgb(196, 73, 20)',
+            borderColor: 'rgb(196, 73, 20)',
+            data: distanceDataArray,
+            pointRadius: 0,
+          }]
+        };
+      
+        const loadsimconfig = {
+          type: 'line',
+          data: loadsimdata,
+          options: {
+            // responsive: false,
+            animation: false,
+            scales: {
+                x:{
+                    display: false,
+                    // beginAtZero: true,
+                    // suggestedMax: 100
+                    suggestedMin: 0,
+                    suggestedMax: 1000,
+                    // ticks: {
+                    //   // forces step size to be 50 units
+                    //   stepSize: 50
+                    // }
+                },
+                y: {
+                    suggestedMin: 0,
+                    suggestedMax: 50
+                }
+            },
+            plugins: {
+            title: {
+                display: true,
+                text: 'Specimen Load and Displacement'
+            }
+          }
+          }
+        };
+        const laserdataconfig = {
+          type: 'line',
+          data: laserdata,
+          options: {
+            // responsive: false,
+            animation: false,
+            scales: {
+                x:{
+                    display: false,
+                    // beginAtZero: true,
+                    // suggestedMax: 100
+                    suggestedMin: 0,
+                    suggestedMax: 1000,
+                    // ticks: {
+                    //   // forces step size to be 50 units
+                    //   stepSize: 50
+                    // }
+                },
+                y: {
+                    suggestedMin: -50,
+                    suggestedMax: 50
+                }
+            },
+            plugins: {
+            title: {
+                display: true,
+                text: 'Specimen Load and Displacement'
+            }
+          }
+          }
+        };
+      </script>
+
+<script>
+  const canvas = document.getElementById('curveCanvas');
+  const ctx = canvas.getContext('2d');
+  // const startButton = document.getElementById('startButton');
+  // const stopButton = document.getElementById('stopButton');
+
+  // Define a simple example curve (x, y) points
+  const profileCurve = [
+    { x: 0, y: 100 },
+    { x: 50, y: 150 },
+    { x: 100, y: 50 },
+    { x: 150, y: 120 },
+    { x: 200, y: 100 },
+    { x: 250, y: 80 },
+    { x: 300, y: 150 },
+    { x: 350, y: 100 }
+  ];
+
+  // Function to draw the profile curve on the canvas
+  function drawCurve() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.beginPath();
+    ctx.moveTo(profileCurve[0].x, profileCurve[0].y);
+    for (const point of profileCurve) {
+      ctx.lineTo(point.x, point.y);
+    }
+    ctx.stroke();
+  }
+
+  // Function to send data based on the profile curve at a specified interval
+  let currentIndex = 0;
+  let intervalID;
+
+  function sendDataBasedOnCurve() {
+    if (currentIndex < profileCurve.length) {
+      const point = profileCurve[currentIndex];
+      // Simulate sending data - you can replace this with your actual data sending logic
+      console.log(`Sending data at x: ${point.x}, y: ${point.y}`);
+      currentIndex++;
+    } else {
+      clearInterval(intervalID);
+      console.log('Data sending completed.');
+    }
+  }
+
+  startButton.addEventListener('click', () => {
+    currentIndex = 0;
+    drawCurve();
+    intervalID = setInterval(sendDataBasedOnCurve, 1000); // Adjust the interval as needed
+  });
+
+  stopButton.addEventListener('click', () => {
+    clearInterval(intervalID);
+  });
+
+  drawCurve();
+</script>
+
+<!-- <script>
+
+  // var timeInterval = 100;
+  // var maxTimeGraph = 50; //in seconds
+  // var start = 0;
+  // var end = 1000;//*maxTimeGraph/timeInterval;
+
+  // var arr = [];
+
+  const explabels = arr;
+
+  // var data1 = [];
+  // for (var i = start; i <= end; i++) {
+  //     data1.push(Math.floor(Math.random() * (100 - 0 + 1) + 0));
+  // }
+
+  // var data2 = [];
+  // for (var i = start; i <= end; i++) {
+  //     data2.push(Math.floor(Math.random() * (100 - 0 + 1) + 0));
+  // }
+
+  // var data3 = []; 
+  // for (var i = start; i <= end; i++) {
+  //     data3.push(50);
+  // }
+
+  const expdata = {
+    labels: explabels,
+    datasets: [{
+            label: 'Chamber Temperature',
+            backgroundColor: 'rgb(50, 100, 168)',
+            borderColor: 'rgb(50, 100, 168)',
+            data: data2,
+            pointRadius: 0,
+          },{
+            label: 'Specimen Temperature',
+            backgroundColor: 'rgb(196, 73, 20)',
+            borderColor: 'rgb(196, 73, 20)',
+            data: data1,
+            pointRadius: 0,
+          },{
+            label: 'Target Specimen Temperature',
+            backgroundColor: 'rgb(235, 180, 2)',
+            borderColor: 'rgb(235, 180, 2)',
+            data: data3,
+            pointRadius: 0,
+          }]
+  };
+
+  const expconfig = {
+    type: 'line',
+    data: expdata,
+    options: {
+      animation: false,
+      scales: {
+          x:{
+              display: false,
+              // beginAtZero: true,
+              // suggestedMax: 100
+              suggestedMin: 0,
+              suggestedMax: 1000,
+              // ticks: {
+              //   // forces step size to be 50 units
+              //   stepSize: 50
+              // }
+          },
+          y: {
+              suggestedMin: 0,
+              suggestedMax: 50
+          }
+      }
+    }
+  };
+</script>
+  -->
+ 
+ <script>
+    const dataChart = new Chart(
+      document.getElementById('dataChart'),
+      config
+    );
+
+    const loaddataChart = new Chart(
+      document.getElementById('loaddataChart'),
+      loadsimconfig
+    );
+
+    const laserdataChart = new Chart(
+      document.getElementById('laserdataChart'),
+      laserdataconfig
+    );
+
+    // const expChart = new Chart(
+    //   document.getElementById('expChart'),
+    //   expconfig
+    // );
+  </script>
+
+  <script>
+      //update every interval
+    //   const element = document.getElementById("content");
+    //   setInterval(function () {element.innerHTML += "Hello"}, timeInterval);
+  </script>
+
+  <script>
+        const button = document.getElementById("connectBle");
+        const sendCmdBtn = document.getElementById("sendCmdBtn");
+        const details = document.getElementById("details");
+        const updateTargetTempBtn = document.getElementById("updateTargetTempBtn");
+        const startTargetTempBtn = document.getElementById("startTargetTempBtn");
+        const stopTargetTempBtn = document.getElementById("stopTargetTempBtn");
+        const recordBtn = document.getElementById("recordBtn");
+        const steppermoveforewardBtn = document.getElementById("steppermoveforewardBtn");
+        const steppermovebackwardBtn = document.getElementById("steppermovebackwardBtn");
+        const stepperhomeBtn = document.getElementById("stepperhomeBtn");
+        const loadtareBtn = document.getElementById("loadtareBtn");
+        const stepperStopBtn = document.getElementById("stepperStopBtn");
+        const stepperOscillateBtn = document.getElementById("stepperOscillateBtn");
+        const setStepperSpeedBtn = document.getElementById("setStepperSpeedBtn");
+        const setStepperOscillateStepsBtn = document.getElementById("setStepperOscillateStepsBtn");
+        const setDistanceConfigBtn = document.getElementById("setDistanceConfigBtn");
+        const distanceRawCb = document.getElementById("distanceRawCb");
+        
+
+        var isUsingDistanceRaw = false;
+        var distanceCorrectionScale = 1.0;
+        
+        var connectionStatus = false;
+        var bledevice;
+        var _uartRxDescriptor;
+        var _uartRxCharacteristic;
+        
+
+        document.getElementById("objecttempvalue").innerHTML = (0.00).toFixed(2) + " ° C";
+        document.getElementById("ambienttempvalue").innerHTML = (0.00).toFixed(2) + " ° C";
+        document.getElementById("targettempvalue").innerHTML = (0.00).toFixed(2) + " ° C";
+        document.getElementById("loadvalue").innerHTML = (0.00).toFixed(2) + " g";
+        document.getElementById("laserdistancevalue").innerHTML = (0.00).toFixed(2) + " mm";
+
+        async function disconnectBleDevice(){
+          await bledevice.gatt.disconnect();
+          button.innerHTML = "Connect";
+            button.classList.remove('btn-danger');
+            button.classList.add('btn-primary');
+            connectionStatus = false;
+        }
+
+        async function connectbleDevice(){
+          try {
+            // Request the Bluetooth device through browser
+            const device = await navigator.bluetooth.requestDevice({
+            optionalServices: ["6e400001-b5a3-f393-e0a9-e50e24dcca9e", "device_information"],
+            acceptAllDevices: true,
+            });
+            bledevice = device;
+
+            // Connect to the GATT server
+            // We also get the name of the Bluetooth device here
+            let deviceName = device.gatt.device.name;
+            const server = await device.gatt.connect();
+            start();
+            isWriteLock = false;
+
+            // Getting the services we mentioned before through GATT server
+            // const batteryService = await server.getPrimaryService("battery_service");
+            // const infoService = await server.getPrimaryService("device_information");
+
+            const uartService = await server.getPrimaryService("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
+
+            // // Getting the current battery level
+            // const batteryLevelCharacteristic = await batteryService.getCharacteristic(
+            // "battery_level"
+            // );
+            // // Convert recieved buffer to number
+            // const batteryLevel = await batteryLevelCharacteristic.readValue();
+            // const batteryPercent = await batteryLevel.getUint8(0);
+
+            const uartRxCharacteristic = await uartService.getCharacteristic(
+            "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
+            );
+
+            const uartTxCharacteristic = await uartService.getCharacteristic(
+            "6e400003-b5a3-f393-e0a9-e50e24dcca9e"
+            );
+
+            _uartRxCharacteristic = uartRxCharacteristic;
+
+            const dataCharacteristic = await uartService.getCharacteristic(
+            "6e400004-b5a3-f393-e0a9-e50e24dcca9e"
+            );
+
+            // const objectTempCharacteristic = await uartService.getCharacteristic(
+            // "6e400004-b5a3-f393-e0a9-e50e24dcca9e"
+            // );
+
+            // const ambientTempCharacteristic = await uartService.getCharacteristic(
+            // "6e400005-b5a3-f393-e0a9-e50e24dcca9e"
+            // );
+
+            // const targetTempCharacteristic = await uartService.getCharacteristic(
+            // "6e400006-b5a3-f393-e0a9-e50e24dcca9e"
+            // );
+
+            start();
+
+            // console.log('Reading Descriptor...');
+            // _uartRxDescriptor = await uartRxCharacteristic.getDescriptor('gatt.characteristic_user_description');
+            // const value = await _uartRxDescriptor.readValue();
+
+            // let decoder = new TextDecoder('utf-8');
+            // console.log('> Characteristic User Description: ' + decoder.decode(value));
+
+            // let encoder = new TextEncoder('utf-8');
+            // var value = "hi";
+            // await _uartRxCharacteristic.writeValueWithoutResponse(encoder.encode(value))
+            //   .then(_ => {
+            //     console.log('> Characteristic User Description changed to: ' + value);
+            //   })
+            //   .catch(error => {
+            //     console.log('Error: ' + error);
+            //   });
+
+            // const pctrlCharacteristic = await uartService.getCharacteristic(
+            // "6e400007-b5a3-f393-e0a9-e50e24dcca9e"
+            // );
+
+            // const ictrlTempCharacteristic = await uartService.getCharacteristic(
+            // "6e400008-b5a3-f393-e0a9-e50e24dcca9e"
+            // );
+
+            // const dctrlTempCharacteristic = await uartService.getCharacteristic(
+            // "6e400009-b5a3-f393-e0a9-e50e24dcca9e"
+            // );
+
+            //const uartTxVal = await uartRxCharacteristic.readValue(); //readvalue for read charactericstics only
+            // console.log(uartTxVal);
+
+            // // Getting device information
+            // // We will get all characteristics from device_information
+            // const infoCharacteristics = await infoService.getCharacteristics();
+
+            // console.log(infoCharacteristics);
+
+            // let infoValues = [];
+
+            // const promise = new Promise((resolve, reject) => {
+            // infoCharacteristics.forEach(async (characteristic, index, array) => {
+            //     // Returns a buffer
+            //     const value = await characteristic.readValue();
+            //     console.log(new TextDecoder().decode(value));
+            //     // Convert the buffer to string
+            //     infoValues.push(new TextDecoder().decode(value));
+            //     if (index === array.length - 1) resolve();
+            // });
+            // });
+
+            // promise.then(() => {
+            // console.log(infoValues);
+            // Display all the information on the screen
+            // use innerHTML
+            // details.innerHTML = `
+            // Device Name - ${deviceName}<br />
+            // Battery Level - ${batteryPercent}%<br />
+            // Device Information:
+            // <ul>
+            //     ${infoValues.map((value) => `<li>${value}</li>`).join("")}
+            // </ul> 
+            // `;
+            // });
+            console.log("connected to " + deviceName);
+
+            uartTxCharacteristic.startNotifications();
+            dataCharacteristic.startNotifications();
+            // ambientTempCharacteristic.startNotifications();
+            // targetTempCharacteristic.startNotifications();
+            // pctrlCharacteristic.startNotifications();
+            // ictrlTempCharacteristic.startNotifications();
+            // dctrlTempCharacteristic.startNotifications();
+            console.log('> Notifications started');
+            uartTxCharacteristic.addEventListener('characteristicvaluechanged',handleNotifications);
+            dataCharacteristic.addEventListener('characteristicvaluechanged',handleDataValueChanged);
+            // objectTempCharacteristic.addEventListener('characteristicvaluechanged',handleObjectTempValueChanged);
+            // ambientTempCharacteristic.addEventListener('characteristicvaluechanged',handleAmbientTempValueChanged);
+            // targetTempCharacteristic.addEventListener('characteristicvaluechanged',handleTargetTempValueChanged);
+            // pctrlCharacteristic.addEventListener('characteristicvaluechanged',handleNotifications);
+            // ictrlTempCharacteristic.addEventListener('characteristicvaluechanged',handleNotifications);
+            // dctrlTempCharacteristic.addEventListener('characteristicvaluechanged',handleNotifications);
+            button.innerHTML = "Disconnect";
+            button.classList.add('btn-danger');
+            button.classList.remove('btn-primary');
+            connectionStatus = true;
+            
+        } catch (err) {
+            console.log(err);
+            alert("An error occured while fetching device details");
+        }
+        }
+        // sendCmdBtn.addEventListener("click", async () => {
+        //   if (!_uartRxCharacteristic) {
+        //     return;
+        //   }
+        //   let encoder = new TextEncoder('utf-8');
+        //   let value = document.querySelector('#commandInput').value;
+        //   console.log('Sending command...');
+        //   await sleep(100); 
+        //   await _uartRxCharacteristic.writeValueWithoutResponse(encoder.encode(value))
+        //   .then(_ => {
+        //     console.log('> Command: ' + value);
+        //     console.log('> Encoded: ' + encoder);
+        //   })
+        //   .catch(error => {
+        //     console.log('Error: ' + error);
+        //   });
+        // });
+
+        sendCmdBtn.addEventListener("click", async () => {
+          // while(isWaitforNotifyDone){}
+                if(isWriteLock || isWaitforNotifyDone){
+                  return;
+                }
+                if (!_uartRxCharacteristic) {
+                  return;
+                }
+                let encoder = new TextEncoder('utf-8');
+                let value = document.querySelector('#commandInput').value;
+                console.log('Sending command...');
+                // await sleep(100); 
+                isWriteLock = true;
+                await _uartRxCharacteristic.writeValue(encoder.encode(value))
+                .then(_ => {
+                  console.log('> Command: ' + value);
+                  isWriteLock = false;
+                  isWaitforNotifyDone = false;
+                  // console.log('> Encoded: ' + encoder);
+                })
+                .catch(error => {
+                  console.log('Error: ' + error);
+                });
+                
+                console.log("send command");
+              });
+
+        updateTargetTempBtn.addEventListener("click", async () => {
+          // while(isWaitforNotifyDone){}
+                if(isWriteLock || isWaitforNotifyDone){
+                  return;
+                }
+                if (!_uartRxCharacteristic) {
+                  return;
+                }
+                let encoder = new TextEncoder('utf-8');
+                let value = "20," + document.querySelector('#targetTempInput').value;
+                console.log('Sending command...');
+                isWriteLock = true;
+                // await sleep(100); 
+                await _uartRxCharacteristic.writeValue(encoder.encode(value))
+                .then(_ => {
+                  console.log('> Command: ' + value);
+                  isWriteLock = false;
+                  isWaitforNotifyDone = false;
+                  // console.log('> Encoded: ' + encoder);
+                })
+                .catch(error => {
+                  console.log('Error: ' + error);
+                });
+                
+                console.log("send command");
+              });
+
+        startTargetTempBtn.addEventListener("click", async () => {
+          // while(isWaitforNotifyDone){}
+               if(isWriteLock || isWaitforNotifyDone){
+                  return;
+                }
+                if (!_uartRxCharacteristic) {
+                  return;
+                }
+                let encoder = new TextEncoder('utf-8');
+                console.log('Sending command...');
+                isWriteLock = true;
+                // await sleep(100); 
+                await _uartRxCharacteristic.writeValue(encoder.encode("10"))
+                .then(_ => {
+                  isWriteLock = false;
+                  isWaitforNotifyDone = false;
+                  // console.log('> Command: ' + value);
+                  // console.log('> Encoded: ' + encoder);
+                })
+                .catch(error => {
+                  console.log('Error: ' + error);
+                });
+                
+                console.log("send command");
+              });
+
+              stopTargetTempBtn.addEventListener("click", async () => {
+                // while(isWaitforNotifyDone){}
+                if(isWriteLock || isWaitforNotifyDone){
+                  return;
+                }
+                if (!_uartRxCharacteristic) {
+                  return;
+                }
+                let encoder = new TextEncoder('utf-8');
+                console.log('Sending command...');
+                // await sleep(100); 
+                isWriteLock = true;
+                await _uartRxCharacteristic.writeValue(encoder.encode("11"))
+                .then(_ => {
+                  isWriteLock = false;
+                  isWaitforNotifyDone = false;
+                  // console.log('> Command: ' + value);
+                  // console.log('> Encoded: ' + encoder);
+                })
+                .catch(error => {
+                  console.log('Error: ' + error);
+                });
+                
+                console.log("send command");
+              });
+
+              steppermoveforewardBtn.addEventListener("click", async () => {
+                // while(isWaitforNotifyDone){}
+                if(isWriteLock || isWaitforNotifyDone){
+                  return;
+                }
+                if (!_uartRxCharacteristic) {
+                  return;
+                }
+                let encoder = new TextEncoder('utf-8');
+                let value = "215," + document.querySelector('#stepperStepsInput').value;
+                console.log('Sending command...');
+                // await sleep(100); 
+                isWriteLock = true;
+                await _uartRxCharacteristic.writeValue(encoder.encode(value))
+                .then(_ => {
+                  isWriteLock = false;
+                  isWaitforNotifyDone = false;
+                  // console.log('> Command: ' + value);
+                  // console.log('> Encoded: ' + encoder);
+                })
+                .catch(error => {
+                  console.log('Error: ' + error);
+                });
+                
+                console.log("send command");
+              });
+
+              steppermovebackwardBtn.addEventListener("click", async () => {
+                // while(isWaitforNotifyDone){}
+                if(isWriteLock || isWaitforNotifyDone){
+                  return;
+                }
+                if (!_uartRxCharacteristic) {
+                  return;
+                }
+                let encoder = new TextEncoder('utf-8');
+                let value = "216," + document.querySelector('#stepperStepsInput').value;
+                console.log('Sending command...');
+                // await sleep(100); 
+                isWriteLock = true;
+                await _uartRxCharacteristic.writeValue(encoder.encode(value))
+                .then(_ => {
+                  isWriteLock = false;
+                  isWaitforNotifyDone = false;
+                  // console.log('> Command: ' + value);
+                  // console.log('> Encoded: ' + encoder);
+                })
+                .catch(error => {
+                  console.log('Error: ' + error);
+                });
+                
+                console.log("send command");
+              });
+
+              stepperhomeBtn.addEventListener("click", async () => {
+                // while(isWaitforNotifyDone){}
+                if(isWriteLock || isWaitforNotifyDone){
+                  return;
+                }
+                if (!_uartRxCharacteristic) {
+                  return;
+                }
+                let encoder = new TextEncoder('utf-8');
+                console.log('Sending command...');
+                // await sleep(100); 
+                isWriteLock = true;
+                await _uartRxCharacteristic.writeValue(encoder.encode("210"))
+                .then(_ => {
+                  isWriteLock = false;
+                  isWaitforNotifyDone = false;
+                  // console.log('> Command: ' + value);
+                  // console.log('> Encoded: ' + encoder);
+                })
+                .catch(error => {
+                  console.log('Error: ' + error);
+                });
+                
+                console.log("send command");
+              });
+
+              loadtareBtn.addEventListener("click", async () => {
+                // while(isWaitforNotifyDone){}
+                if(isWriteLock || isWaitforNotifyDone){
+                  return;
+                }
+                if (!_uartRxCharacteristic) {
+                  return;
+                }
+                let encoder = new TextEncoder('utf-8');
+                console.log('Sending command...');
+                // await sleep(100); 
+                isWriteLock = true;
+                await _uartRxCharacteristic.writeValue(encoder.encode("111"))
+                .then(_ => {
+                  isWriteLock = false;
+                  isWaitforNotifyDone = false;
+                  // console.log('> Command: ' + value);
+                  // console.log('> Encoded: ' + encoder);
+                })
+                .catch(error => {
+                  console.log('Error: ' + error);
+                });
+                
+                console.log("send command");
+              });
+
+              stepperStopBtn.addEventListener("click", async () => {
+                // while(isWaitforNotifyDone){}
+                if(isWriteLock || isWaitforNotifyDone){
+                  return;
+                }
+                if (!_uartRxCharacteristic) {
+                  return;
+                }
+                let encoder = new TextEncoder('utf-8');
+                console.log('Sending command...');
+                // await sleep(100); 
+                isWriteLock = true;
+                await _uartRxCharacteristic.writeValue(encoder.encode("13"))
+                .then(_ => {
+                  isWriteLock = false;
+                  isWaitforNotifyDone = false;
+                  // console.log('> Command: ' + value);
+                  // console.log('> Encoded: ' + encoder);
+                })
+                .catch(error => {
+                  console.log('Error: ' + error);
+                });
+                
+                console.log("send command");
+              });
+
+              stepperOscillateBtn.addEventListener("click", async () => {
+                // while(isWaitforNotifyDone){}
+                if(isWriteLock || isWaitforNotifyDone){
+                  return;
+                }
+                if (!_uartRxCharacteristic) {
+                  return;
+                }
+                let encoder = new TextEncoder('utf-8');
+                let value = "220," + document.querySelector('#oscillationStepInput').value;
+                console.log('Sending command...');
+                // await sleep(100); 
+                isWriteLock = true;
+                await _uartRxCharacteristic.writeValue(encoder.encode(value))
+                .then(_ => {
+                  isWriteLock = false;
+                  isWaitforNotifyDone = false;
+                  // console.log('> Command: ' + value);
+                  // console.log('> Encoded: ' + encoder);
+                })
+                .catch(error => {
+                  console.log('Error: ' + error);
+                });
+                
+                console.log("send command");
+              });
+
+              setStepperSpeedBtn.addEventListener("click", async () => {
+                // while(isWaitforNotifyDone){}
+                if(isWriteLock || isWaitforNotifyDone){
+                  return;
+                }
+                if (!_uartRxCharacteristic) {
+                  return;
+                }
+                let encoder = new TextEncoder('utf-8');
+                let value = "28," + document.querySelector('#stepperSpeedInput').value;
+                console.log('Sending command...');
+                // await sleep(100); 
+                isWriteLock = true;
+                await _uartRxCharacteristic.writeValue(encoder.encode(value))
+                .then(_ => {
+                  isWriteLock = false;
+                  isWaitforNotifyDone = false;
+                  // console.log('> Command: ' + value);
+                  // console.log('> Encoded: ' + encoder);
+                })
+                .catch(error => {
+                  console.log('Error: ' + error);
+                });
+                
+                console.log("send command");
+              });
+
+              setDistanceConfigBtn.addEventListener("click", async () => {
+                distanceCorrectionScale = parseFloat(document.querySelector('#distanceScaleInput').value);
+              });
+
+              distanceRawCb.addEventListener('change', (event) => {
+                if (event.currentTarget.checked) {
+                  //alert('checked');
+                  isUsingDistanceRaw = true;
+                } else {
+                  //alert('not checked');
+                  isUsingDistanceRaw = false;
+                }
+              })
+
+              // setStepperOscillateStepsBtn.addEventListener("click", async () => {
+              //   // while(isWaitforNotifyDone){}
+              //   if(isWriteLock || isWaitforNotifyDone){
+              //     return;
+              //   }
+              //   if (!_uartRxCharacteristic) {
+              //     return;
+              //   }
+              //   let encoder = new TextEncoder('utf-8');
+              //   let value = "20," + document.querySelector('#oscillationStepInput').value;
+              //   console.log('Sending command...');
+              //   // await sleep(100); 
+              //   isWriteLock = true;
+              //   await _uartRxCharacteristic.writeValue(encoder.encode("220,500"))
+              //   .then(_ => {
+              //     isWriteLock = false;
+              //     isWaitforNotifyDone = false;
+              //     // console.log('> Command: ' + value);
+              //     // console.log('> Encoded: ' + encoder);
+              //   })
+              //   .catch(error => {
+              //     console.log('Error: ' + error);
+              //   });
+                
+              //   console.log("send command");
+              // });
+
+        button.addEventListener("click", async () => {
+          if(connectionStatus == false)
+          connectbleDevice();
+          else
+          disconnectBleDevice();
+          
+        });
+
+        async function sleep(milliseconds) {
+          const date = Date.now();
+          let currentDate = null;
+          do {
+            currentDate = Date.now();
+          } while (currentDate - date < milliseconds);
+        }
+
+        function handleNotifications(event) {
+            let value = event.target.value;
+            let a = [];
+            // Convert raw data bytes to hex values just for the sake of showing something.
+            // In the "real" world, you'd use data.getUint8, data.getUint16 or even
+            // TextDecoder to process raw data bytes.
+            for (let i = 0; i < value.byteLength; i++) {
+                a.push('0x' + ('00' + value.getUint8(i).toString(16)).slice(-2));
+            }
+           // console.log(new TextDecoder().decode(value));
+            //console.log(value.getUint8(0));
+            const readvalue = document.getElementById("readvalue");
+            // readvalue.innerHTML = value.getUint8(0);
+            //console.log('> ' + a.join(' '));
+            }
+
+          function getFloat(array) {
+              var view = new DataView(new ArrayBuffer(8));
+              array.forEach(function (b, i) {
+                  view.setUint8(i, b);
+              });
+              return view.getFloat64(0);
+          }
+
+          function valueToDouble(value){
+            let data = [];
+            for (let i = 0; i < value.byteLength; i++) {
+              data.push(value.getUint8(i));
+            }
+            data = data.reverse();
+            // var i = 0, result = [];
+            // while (i < data.length) {
+            //     result.push(getFloat(data.slice(i, i + 8)));
+            //     i += 8;
+            // }
+            return getFloat(data.slice(0,8));
+          }
+
+          var objectTempCounter = 0.0;
+          var objectTempNumberAvg = 10.0;
+          var objectTempAvg = 0.0;
+          var correctedLoad = 0;
+
+        function handleDataValueChanged(event) {
+            isWaitforNotifyDone = true;
+            let value = event.target.value;
+            //console.log(new TextDecoder().decode(value))
+            var data = new TextDecoder().decode(value);
+            const dataArray = data.split("|");
+            var objectTemp = parseFloat(dataArray[0]).toFixed(2);
+            if(objectTempCounter>objectTempNumberAvg){
+              document.getElementById("objecttempvalue").innerHTML = parseFloat(objectTempAvg/(objectTempNumberAvg+1)).toFixed(2) + " ° C";
+              objectTempCounter = 0;
+              objectTempAvg = 0;
+            }
+            else{
+              objectTempAvg += parseFloat(objectTemp);
+              objectTempCounter++;
+            }
+
+            document.getElementById("ambienttempvalue").innerHTML = parseFloat(dataArray[1]).toFixed(2) + " ° C";
+            document.getElementById("targettempvalue").innerHTML = parseFloat(dataArray[2]).toFixed(2) + " ° C";
+            var loadval = 0.0 - parseFloat(dataArray[4]);
+            document.getElementById("loadvalue").innerHTML = loadval.toFixed(2) + " g";
+            var correctedDistance = 0;
+            //console.log(parseFloat(dataArray[5]))
+            if(Math.abs(parseFloat(dataArray[5]))>0.01 ){
+              correctedDistance = ((4.0761*1000)/(parseFloat(dataArray[5])))*distanceCorrectionScale;//*-2.583106267029973;//*-0.4027;// - 34.134;
+              //correctedDistance = parseFloat(dataArray[5]);
+            }
+            // if(Math.abs(correctedDistance)<0.01)
+            // correctedDistance = 0;
+            if(isUsingDistanceRaw)
+            document.getElementById("laserdistancevalue").innerHTML = parseFloat(dataArray[5]) + "";
+            else
+            document.getElementById("laserdistancevalue").innerHTML = correctedDistance.toFixed(2) + " mm";
+            // readvalue.innerHTML = valuedouble.toFixed(2) + " ° C";
+            if(data1.length>1000) data1.shift();
+            if(Math.abs(parseFloat(dataArray[0])) > parseFloat(data1[data1.length - 1]) + 100) data1.push(parseFloat(data1[data1.length - 1]));
+            else data1.push(parseFloat(dataArray[0]));
+            if(data2.length>1000) data2.shift();
+            // console.log(Math.abs(parseFloat(dataArray[1]) - parseFloat(data2[data2.length - 1])) + 100)
+            if(Math.abs(parseFloat(dataArray[1]) - parseFloat(data2[data2.length - 1])) > parseFloat(data1[data1.length - 1]) + 100) data2.push(parseFloat(data2[data2.length - 1]));
+            else data2.push(parseFloat(dataArray[1]));
+            if(data3.length>1000) data3.shift();
+            data3.push(parseFloat(dataArray[2]));
+
+            //for load sim graph
+            if(loadDataArray.length>1000) loadDataArray.shift();
+            // if(loadval>0)
+            loadKalmanFilter.filter(loadval);
+            var loadvalfinal = loadval;//loadKalmanFilter.x;
+            if(Math.abs(parseFloat(loadvalfinal))<6000 && parseFloat(loadvalfinal) != 0.00){
+              correctedLoad = parseFloat(loadvalfinal);
+            }
+            loadDataArray.push(correctedLoad);
+
+            if(isUsingDistanceRaw)
+            distanceDataArray.push(parseFloat(dataArray[5]));
+            else{
+              if(Math.abs(correctedDistance)<50){
+              if(distanceDataArray.length>1000) distanceDataArray.shift();
+              distanceKalmanFilter.filter(correctedDistance);
+              distanceDataArray.push(parseFloat(distanceKalmanFilter.x));
+            }
+            }
+
+
+            isWaitforNotifyDone = false;
+            // dataChart.update();
+            }
+
+
+        function handleObjectTempValueChanged(event) {
+          isWaitforNotifyDone = true;
+            let value = event.target.value;
+            const readvalue = document.getElementById("objecttempvalue");
+            var valuedouble = valueToDouble(value);
+            readvalue.innerHTML = valuedouble.toFixed(2) + " ° C";
+            if(data1.length>1000) data1.shift();
+            data1.push(valuedouble);
+            isWaitforNotifyDone = false;
+            // dataChart.update();
+            }
+
+        function handleAmbientTempValueChanged(event) {
+          isWaitforNotifyDone = true;
+          let value = event.target.value;
+          const readvalue = document.getElementById("ambienttempvalue");
+          var valuedouble = valueToDouble(value);
+            readvalue.innerHTML = valuedouble.toFixed(2) + " ° C";
+            if(data2.length>1000) data2.shift();
+            data2.push(valuedouble);
+            isWaitforNotifyDone = false;
+            }
+
+            var targettemptemp = 0;
+
+        function handleTargetTempValueChanged(event) {
+          isWaitforNotifyDone = true;
+            let value = event.target.value;
+            const readvalue = document.getElementById("targettempvalue");
+            var valuedouble = valueToDouble(value);
+            readvalue.innerHTML = valuedouble.toFixed(2) + " ° C";
+            if(targettemptemp != valuedouble.toFixed(2)){
+              targetTempInput.value = valuedouble.toFixed(2);
+              targettemptemp = valuedouble.toFixed(2);
+            }
+           
+            if(data3.length>1000) data3.shift();
+            data3.push(valuedouble);
+            isWaitforNotifyDone = false;
+            }
+
+            const interval = setInterval(function() {
+              dataChart.update();
+              loaddataChart.update();
+              laserdataChart.update();
+            }, 10);
+
+            var isRecording = false;
+            var recordDataString = "";
+
+            recordBtn.addEventListener("click", async () => {
+                if(!isRecording){
+                  recordBtn.innerHTML = "Stop Recording";
+                  console.log("Start recording")
+                  isRecording = true;
+                }
+                else{
+                  recordBtn.innerHTML = "Start Recording"
+                  download(recordDataString, "data", ".csv");
+                  isRecording = false;
+                }
+              });
+
+              setInterval(function () {
+                if(isRecording){
+                  var timeDiff = new Date() - startTime; 
+                  recordDataString += String(timeDiff) + "," + String(data1[data1.length - 1]) + "," + String(data2[data2.length - 1]) + "," + String(data3[data3.length - 1]) + "," + String(loadDataArray[loadDataArray.length - 1]) + "," + String(distanceDataArray[distanceDataArray.length - 1]) + "\n"
+                }
+                else{
+                  recordDataString = "";
+                }
+              }, 10);
+
+              // Function to download data to a file
+              function download(data, filename, type) {
+                  var file = new Blob([data], {type: type});
+                  if (window.navigator.msSaveOrOpenBlob) // IE10+
+                      window.navigator.msSaveOrOpenBlob(file, filename);
+                  else { // Others
+                      var a = document.createElement("a"),
+                              url = URL.createObjectURL(file);
+                      a.href = url;
+                      a.download = filename;
+                      document.body.appendChild(a);
+                      a.click();
+                      setTimeout(function() {
+                          document.body.removeChild(a);
+                          window.URL.revokeObjectURL(url);  
+                      }, 0); 
+                  }
+              }
+  </script>
+
+  <script>
+    var startTime, endTime;
+
+    function start() {
+      startTime = new Date();
+    };
+
+    function end() {
+      endTime = new Date();
+      var timeDiff = endTime - startTime; //in ms
+      // strip the ms
+      timeDiff /= 1000;
+
+      // get seconds 
+      var seconds = Math.round(timeDiff);
+      // console.log(seconds + " seconds");
+      if(seconds)
+      elapsedTime.innerHTML = seconds + " seconds";
+      else elapsedTime.innerHTML = "0 seconds";
+    }
+
+    setInterval(function () {
+      end();
+      
+    }, 1000);
+  </script>
+      <script>
+        feather.replace()
+      </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+  </body>
+</html>
